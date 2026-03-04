@@ -55,7 +55,7 @@ class APIException(HTTPException):
         super().__init__(status_code=status_code)
 
 @app.exception_handler(APIException)
-async def unicorn_exception_handler(request: Request, exc: APIException):
+async def api_exception_handler(request: Request, exc: APIException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"error" : {
