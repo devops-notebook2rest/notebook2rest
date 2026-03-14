@@ -25,6 +25,11 @@ class NotebookConverter(Preprocessor):
         with open(path, "r", encoding="utf-8") as f:
             return nbformat.read(f, as_version=4)
 
+    def check_index_validity(self, cell_index: int, notebook: nbformat.NotebookNode):
+        notebook_cells_length = len(notebook.cells)
+        if cell_index < 0 or cell_index >= notebook_cells_length:
+            raise IndexError(f"Cell index [{cell_index}] is out of bounds. This notebook consists of [{notebook_cells_length - 1}] cells.")
+
     def execute(self, file_path: Path) -> tuple[nbformat.NotebookNode, Path]:
         out_path = self.get_executed_file_path(file_path)
 
@@ -42,9 +47,11 @@ class NotebookConverter(Preprocessor):
 
         if out_path.is_file():
             executed_np = self.read_notebook(out_path)
+            self.check_index_validity(cell_index, executed_np)
             return executed_np.cells[cell_index]
         else:
             notebook_content = self.read_notebook(file_path)
+            self.check_index_validity(cell_index, notebook_content)
             notebook_cell = notebook_content.cells[cell_index]
             client = nbclient.NotebookClient(notebook_content, kernel_name="python3")
 

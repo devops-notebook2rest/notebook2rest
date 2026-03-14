@@ -57,14 +57,20 @@ def get_results(notebook_name: str, request: Request):
             return JSONResponse(content=result)
     except Exception as e:
         raise APIException(
-            f"An error occured while exporting the [{notebook_name}] notebook.",
+            f"An error occured while executing the [{notebook_name}] notebook.",
             str(e)
         )
 
 @app.get("/api/notebooks/{notebook_name}/cells/{cell_index}/execute", summary="Executes a notebook's cell")
 def get_cell_results(notebook_name: str, cell_index:int, request: Request):
-    file_path = get_notebook_file_path(notebook_name)
-    return CONVERTER.convert_notebook_cell_to_json(file_path, cell_index)
+    try:
+        file_path = get_notebook_file_path(notebook_name)
+        return CONVERTER.convert_notebook_cell_to_json(file_path, cell_index)
+    except Exception as e:
+        raise APIException(
+            f"An error occured while executing the [{cell_index}] cell of [{notebook_name}] notebook.",
+            str(e)
+        )
 
 @app.get("/api/version")
 def version():
