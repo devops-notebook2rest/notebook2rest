@@ -37,7 +37,15 @@ def get_notebook_file_path(notebook_name: str):
 
     return file_path
 
-@app.get("/api/notebooks/{notebook_name}/execute", summary="Executes a notebook")
+@app.get("/api/notebooks/{notebook_name}/execute", summary="Executes a notebook",
+         responses={
+             200: {
+                 "content": {
+                     "application/x-ipynb+json": {},
+                     "application/test": {}
+                 }
+             }}
+         )
 def get_results(notebook_name: str, request: Request):
     file_path = get_notebook_file_path(notebook_name)
 
