@@ -42,32 +42,32 @@ def get_notebook_file_path(notebook_name: str):
     "/api/notebooks/{notebook_name}/execute",
     summary="Executes a notebook",
     description="""
-        Executes the notebook (if not already executed) and returns the result.
+        Execute the notebook and return the result in the requested format
+        using the **Accept header**.
 
-        Formats available:
+        Supported formats:
 
-        - JSON: `/api/notebooks/{notebook_name}/execute`
-        - HTML report: `/api/notebooks/{notebook_name}/execute?format=html`
-        - Download notebook: `/api/notebooks/{notebook_name}/execute?format=ipynb`
+        - `application/json` → executed notebook JSON
+        - `application/x-ipynb+json` → download executed notebook
+        - `text/html` → rendered HTML notebook
         """,
     responses={
         200: {
             "content": {
                 "application/json": {},
-                "text/html": {},
-                "application/x-ipynb+json": {}
+                "application/x-ipynb+json": {},
+                "text/html": {}
             }
         }
     }
 )
-def get_results(
-        notebook_name: str, 
-        format: Literal["json", "ipynb", "html"] = "json"
-        ):
+def get_results(notebook_name: str, request: Request):
     file_path = get_notebook_file_path(notebook_name)
+    # accept_header = request.headers.get("Accept", "")
+    accept_header = request.headers.get("accept", "").lower()
 
     try:
-        if format == "ipynb":
+        if "application/x-ipynb+json" in accept_header:
             out_path = CONVERTER.convert_notebook_to_ipynb(file_path)
 
             return FileResponse(
@@ -75,19 +75,14 @@ def get_results(
                 filename=out_path.name,
                 media_type="application/x-ipynb+json"
             )
-        elif format == "html":
+
+        elif "text/html" in accept_header:
             html_content = CONVERTER.convert_notebook_to_html(file_path)
             return HTMLResponse(
                 content=html_content,
                 media_type="text/html"
             )
 
-            # return HTMLResponse(
-            #     content=html_content,
-            #     headers={
-            #         "Content-Disposition": "inline; filename=notebook.html"
-            #     }
-            # )
         else:
             result = CONVERTER.convert_notebook_to_json(file_path)
             return JSONResponse(
