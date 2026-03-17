@@ -5,7 +5,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 from pydantic import BaseModel
 from notebook_converter import NotebookConverter
-from typing import Literal
 import os
 
 NOTEBOOKS_PATH = Path("notebooks")
